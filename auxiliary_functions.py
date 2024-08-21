@@ -1,6 +1,8 @@
-from typing import Tuple, Any, List
+from typing import Any
+import matplotlib.pyplot as plt
 import pandas as pd
-from pandas import Series, DataFrame
+import seaborn as sns
+from pandas.core.interchange import column
 
 
 class Utils:
@@ -17,7 +19,7 @@ class Utils:
 
 
     @staticmethod
-    def find_outliers_iqr(df:pd.DataFrame, column: pd.DataFrame.columns):
+    def find_outliers_iqr(df:pd.DataFrame, column: pd.DataFrame.columns) -> Any:
         """Functions finds outliers based on IQR. It returns outliers as dataframe and IQR boundaries as a list."""
         q1 = df[column].quantile(0.25)
         q3 = df[column].quantile(0.75)
@@ -30,3 +32,17 @@ class Utils:
         outliers = df[(df[column] < lower_bound) | (df[column] > upper_bound)]
 
         return outliers, boundaries
+
+
+    @staticmethod
+    def create_bar_plot(df: pd.DataFrame, column: pd.DataFrame.columns) -> None:
+        """Functions creates a count plot of the selected column in data frame"""
+        value_counts = df[column].value_counts().sort_index()
+
+        plt.figure(figsize=(8, 6))
+        sns.barplot(x=value_counts.index, y=value_counts.values, order=value_counts.index)
+
+        plt.title(f'Distribution of {column}')
+        plt.xlabel(f'{column}')
+        plt.ylabel('Count')
+        plt.show()
