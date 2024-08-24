@@ -46,3 +46,22 @@ class Utils:
         plt.xlabel(f'{column}')
         plt.ylabel('Count')
         plt.show()
+
+    @staticmethod
+    def create_bivar_bar_plot(df: pd.DataFrame, column: pd.DataFrame.columns, target_feature: pd.DataFrame.columns) \
+            -> None:
+        plt.figure(figsize=(8, 6))
+        sns.countplot(x=df[column], hue=target_feature, data=df)
+        plt.title(f'Bar plot of {column} by {target_feature}')
+        plt.show()
+
+    @staticmethod
+    def create_bivar_violin_plot(df: pd.DataFrame, column: pd.DataFrame.columns, target_feature: pd.DataFrame.columns) \
+            -> None:
+        plt.figure(figsize=(8, 6))
+        sns.violinplot(x=target_feature, y=column, data=df)
+        plt.title(f'Violin plot of {column} by {target_feature}')
+        plt.show()
+
+
+
