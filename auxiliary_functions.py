@@ -3,7 +3,6 @@ from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from pandas.core.interchange import column
 
 
 class Utils:
@@ -75,6 +74,18 @@ class Utils:
         ohe_df = pd.DataFrame(ohe_columns, columns=ohe.get_feature_names_out([column]))
 
         df = pd.concat([df.reset_index(drop=True), ohe_df.reset_index(drop=True)], axis=1)
+        df = df.drop(columns=[column], axis=1)
+
+        return df
+
+    @staticmethod
+    def numerical_feature_std(df: pd.DataFrame, column: pd.DataFrame.columns) -> pd.DataFrame:
+        std = StandardScaler()
+
+        std.fit(df[[column]])
+        std_column = std.transform(df[[column]])
+
+        df[f'{column}_std'] = std_column
         df = df.drop(columns=[column], axis=1)
 
         return df
