@@ -1,4 +1,5 @@
 from typing import Any
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
@@ -52,6 +53,7 @@ class Utils:
             -> None:
         plt.figure(figsize=(8, 6))
         sns.countplot(x=df[column], hue=target_feature, data=df)
+
         plt.title(f'Bar plot of {column} by {target_feature}')
         plt.show()
 
@@ -60,8 +62,19 @@ class Utils:
             -> None:
         plt.figure(figsize=(8, 6))
         sns.violinplot(x=target_feature, y=column, data=df)
+
         plt.title(f'Violin plot of {column} by {target_feature}')
         plt.show()
 
+    @staticmethod
+    def categorical_feature_ohe(df: pd.DataFrame, column: pd.DataFrame.columns) -> pd.DataFrame:
+        ohe = OneHotEncoder(sparse_output=False)
 
+        ohe.fit(df[[column]])
+        ohe_columns = ohe.transform(df[[column]])
+        ohe_df = pd.DataFrame(ohe_columns, columns=ohe.get_feature_names_out([column]))
 
+        df = pd.concat([df.reset_index(drop=True), ohe_df.reset_index(drop=True)], axis=1)
+        df = df.drop(columns=[column], axis=1)
+
+        return df
