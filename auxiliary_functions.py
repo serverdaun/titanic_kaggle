@@ -2,7 +2,7 @@ from typing import Any
 
 import numpy as np
 from sklearn.metrics import accuracy_score, f1_score
-from sklearn.model_selection import cross_val_score, train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split, GridSearchCV
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -117,8 +117,12 @@ class Utils:
 
         return best_model, results
 
+    @staticmethod
+    def hyper_params_tuning(model: dict, x: pd.DataFrame, y: pd.DataFrame, param_grid: dict) -> Any:
+        grid_search = GridSearchCV(estimator=model, param_grid=param_grid, cv=5, scoring='accuracy')
+        grid_search.fit(x, y)
 
+        print(f'Best parameters found: {grid_search.best_params_}')
+        print(f'Best score: {grid_search.best_score_:.4f}')
 
-
-
-
+        return grid_search.best_params_
