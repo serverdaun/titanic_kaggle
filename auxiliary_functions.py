@@ -1,4 +1,8 @@
 from typing import Any
+
+import numpy as np
+from sklearn.metrics import accuracy_score, f1_score
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -89,3 +93,32 @@ class Utils:
         df = df.drop(columns=[column], axis=1)
 
         return df
+
+    @staticmethod
+    def select_best_model(models: dict, x: pd.DataFrame, y: pd.DataFrame) -> Any:
+        best_model = None
+        best_score = 0
+        results = []
+
+        X_train, X_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+
+        for name, model in models.items():
+            cv_scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy')
+            mean_score = np.mean(cv_scores).round(4)
+            results.append((name, mean_score))
+
+            print(f'{name}: Mean CV Accuracy equals to {mean_score}')
+
+            if mean_score > best_score:
+                best_score = mean_score
+                best_model = model
+
+        print(f'Best model: {best_model.__class__.__name__}')
+
+        return best_model, results
+
+
+
+
+
+
