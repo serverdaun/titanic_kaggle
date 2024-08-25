@@ -9,7 +9,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVC
 
 TRAIN_DATA_PATH = '../data/train.csv'
-SVC_PARAMS = {'C': 10, 'coef0': 0.0, 'degree': 3, 'gamma': 'scale', 'kernel': 'poly'}
+SVC_PARAMS = {'C': 10, 'coef0': 0.5, 'degree': 3, 'gamma': 0.01, 'kernel': 'poly'}
 
 def fill_na_age(df: pd.DataFrame) -> pd.DataFrame:
     df_upd = df.copy()
@@ -136,6 +136,7 @@ def main():
 
     cv_scores = cross_val_score(pipe, X, y, cv=5, scoring='accuracy')
     mean_cv_scores = cv_scores.mean().round(4)
+    print(f'Mean CV Score: {mean_cv_scores}')
 
     pipe.fit(X, y)
     with open('titanic_classifier_model.pkl', 'wb') as f:
