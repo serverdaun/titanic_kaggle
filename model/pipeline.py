@@ -3,6 +3,7 @@ import datetime
 import pandas as pd
 import numpy as np
 from sklearn.compose import make_column_selector, ColumnTransformer
+from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 from sklearn.model_selection import cross_val_score
@@ -113,9 +114,11 @@ def main():
 
     # Defining transformation logic for features
     categorical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='constant', fill_value='None')),
         ('ohe_transformer', OneHotEncoder(handle_unknown='ignore'))
     ])
     numerical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='mean')),
         ('std_scaler', StandardScaler())
     ])
 
