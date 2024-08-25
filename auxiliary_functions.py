@@ -104,7 +104,7 @@ class Utils:
             mean_score = np.mean(cv_scores)
             results.append((name, mean_score))
 
-            print(f'{name}: Mean CV Accuracy equals to {mean_score}:.4f')
+            print(f'{name}: Mean CV Accuracy equals to {mean_score:.4f}')
 
             if mean_score > best_score:
                 best_score = mean_score
