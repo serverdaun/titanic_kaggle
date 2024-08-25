@@ -116,3 +116,4 @@ websocket-client==1.8.0
 widgetsnbextension==4.0.11
 
 scikit-learn~=1.5.1
+dill~=0.3.8
