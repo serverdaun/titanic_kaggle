@@ -3,16 +3,20 @@ import datetime
 import pandas as pd
 import numpy as np
 from sklearn.compose import make_column_selector, ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
-from sklearn.model_selection import cross_val_score
-from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV
 
 TRAIN_DATA_PATH = '../data/train.csv'
-# SVC_PARAMS = {'C': 10, 'coef0': 0.5, 'degree': 3, 'gamma': 0.01, 'kernel': 'poly'}
-RF_PARAMS = {'n_estimators': 100, 'max_depth': 8, 'min_samples_split': 10, 'min_samples_leaf': 2, 'random_state': 42}
+
+param_grid = {
+    'classifier__n_estimators': [100, 200],
+    'classifier__max_depth': [5, 8, 12],
+    'classifier__min_samples_split': [2, 5, 10],
+    'classifier__min_samples_leaf': [1, 2, 4]
+}
 
 def fill_na_age(df: pd.DataFrame) -> pd.DataFrame:
     df_upd = df.copy()
@@ -136,30 +140,41 @@ def main():
         ('numerical_transformer', numerical_transformer, numerical_features)
     ])
 
-    # Defining model with the selected parameters
-    model = RandomForestClassifier(**RF_PARAMS)
+    models = {
+        'RandomForest': RandomForestClassifier(),
+        'GradientBoosting': GradientBoostingClassifier()
+    }
 
-    pipe = Pipeline(steps=[
-        ('preprocessor', preprocessor),
-        ('column_transformer', column_transformer),
-        ('classifier', model)
-    ])
+    # Performing GridSearchCV on multiple models
+    best_score = 0
+    best_model = None
+    for model_name, model in models.items():
+        print(f"Tuning hyperparameters for {model_name}...")
+        pipe = Pipeline(steps=[
+            ('preprocessor', preprocessor),
+            ('column_transformer', column_transformer),
+            ('classifier', model)
+        ])
 
-    cv_scores = cross_val_score(pipe, X, y, cv=10, scoring='accuracy')
-    mean_cv_scores = cv_scores.mean().round(4)
-    print(f'Mean CV Score: {mean_cv_scores}')
+        grid_search = GridSearchCV(pipe, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
+        grid_search.fit(X, y)
 
-    pipe.fit(X, y)
+        if grid_search.best_score_ > best_score:
+            best_score = grid_search.best_score_
+            best_model = grid_search.best_estimator_
+
+    print(f'Best Model: {type(best_model.named_steps["classifier"]).__name__} with Accuracy: {best_score:.4f}')
+
     with open('titanic_classifier_model.pkl', 'wb') as f:
         dill.dump({
-            'model': pipe,
+            'model': best_model,
             'metadata': {
                 'name': 'Titanic Survival Classifier',
                 'author': 'Vasilii Tokarev',
                 'version': '1.0',
                 'date': datetime.datetime.now().strftime('%Y-%m-%d'),
-                'type': type(pipe.named_steps['classifier']).__name__,
-                'score': mean_cv_scores
+                'type': type(best_model.named_steps['classifier']).__name__,
+                'score': best_score
             }
         }, file=f, recurse=True)
 
