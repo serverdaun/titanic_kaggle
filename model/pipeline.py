@@ -8,14 +8,32 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
 from sklearn.model_selection import GridSearchCV
+from xgboost import XGBClassifier
 
 TRAIN_DATA_PATH = '../data/train.csv'
 
-param_grid = {
-    'classifier__n_estimators': [100, 200],
-    'classifier__max_depth': [5, 8, 12],
-    'classifier__min_samples_split': [2, 5, 10],
-    'classifier__min_samples_leaf': [1, 2, 4]
+params_grid = {
+    'RandomForest': {
+        'classifier__n_estimators': [100, 200],
+        'classifier__max_depth': [5, 8, 12],
+        'classifier__min_samples_split': [2, 5, 10],
+        'classifier__min_samples_leaf': [1, 2, 4]
+    },
+    'GradientBoosting': {
+        'classifier__n_estimators': [100, 200],
+        'classifier__max_depth': [5, 8, 12],
+        'classifier__min_samples_split': [2, 5, 10],
+        'classifier__min_samples_leaf': [1, 2, 4]
+    },
+    'XGBoost': {
+        'classifier__n_estimators': [100, 200],
+        'classifier__max_depth': [3, 5, 7],
+        'classifier__learning_rate': [0.01, 0.1, 0.2],
+        'classifier__subsample': [0.7, 0.8, 1.0],
+        'classifier__colsample_bytree': [0.7, 0.8, 1.0],
+        'classifier__gamma': [0, 0.1, 0.2],
+        'classifier__min_child_weight': [1, 5, 10]
+    }
 }
 
 def fill_na_age(df: pd.DataFrame) -> pd.DataFrame:
@@ -142,7 +160,8 @@ def main():
 
     models = {
         'RandomForest': RandomForestClassifier(),
-        'GradientBoosting': GradientBoostingClassifier()
+        'GradientBoosting': GradientBoostingClassifier(),
+        'XGBoost': XGBClassifier()
     }
 
     # Performing GridSearchCV on multiple models
@@ -156,7 +175,7 @@ def main():
             ('classifier', model)
         ])
 
-        grid_search = GridSearchCV(pipe, param_grid, cv=5, scoring='accuracy', n_jobs=-1)
+        grid_search = GridSearchCV(pipe, params_grid[model_name], cv=5, scoring='accuracy', n_jobs=-1)
         grid_search.fit(X, y)
 
         if grid_search.best_score_ > best_score:
@@ -171,7 +190,7 @@ def main():
             'metadata': {
                 'name': 'Titanic Survival Classifier',
                 'author': 'Vasilii Tokarev',
-                'version': '1.0',
+                'version': '1.1',
                 'date': datetime.datetime.now().strftime('%Y-%m-%d'),
                 'type': type(best_model.named_steps['classifier']).__name__,
                 'score': best_score
