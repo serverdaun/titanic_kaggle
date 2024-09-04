@@ -48,9 +48,9 @@ venv.bak/
 ENV/
 
 # Data files
-*.csv
+#*.csv
 *.tsv
-*.data
+#*.data
 *.dat
 *.npy
 *.npz
@@ -147,7 +147,7 @@ password*
 credentials*
 
 # Specific datasets (optional)
-data/
+#data/
 datasets/
 
 # Specific results (optional)
