@@ -3,6 +3,7 @@ import datetime
 import pandas as pd
 import numpy as np
 from sklearn.compose import make_column_selector, ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import FunctionTransformer, OneHotEncoder, StandardScaler
@@ -10,7 +11,8 @@ from sklearn.model_selection import cross_val_score
 from sklearn.svm import SVC
 
 TRAIN_DATA_PATH = '../data/train.csv'
-SVC_PARAMS = {'C': 10, 'coef0': 0.5, 'degree': 3, 'gamma': 0.01, 'kernel': 'poly'}
+# SVC_PARAMS = {'C': 10, 'coef0': 0.5, 'degree': 3, 'gamma': 0.01, 'kernel': 'poly'}
+RF_PARAMS = {'n_estimators': 100, 'max_depth': 8, 'min_samples_split': 10, 'min_samples_leaf': 2, 'random_state': 42}
 
 def fill_na_age(df: pd.DataFrame) -> pd.DataFrame:
     df_upd = df.copy()
@@ -56,6 +58,12 @@ def create_is_alone(df: pd.DataFrame) -> pd.DataFrame:
 def create_title(df: pd.DataFrame) -> pd.DataFrame:
     df_upd = df.copy()
     df_upd['title'] = df_upd['Name'].str.extract(' ([A-Za-z]+)\\.', expand=False)
+
+    df_upd['title'] = df_upd['title'].replace(['Lady', 'Countess', 'Capt', 'Col', 'Don', 'Dr', 'Major', 'Rev', 'Sir',
+                                               'Jonkheer', 'Dona'], 'Rare')
+    df_upd['title'] = df_upd['title'].replace('Mlle', 'Miss')
+    df_upd['title'] = df_upd['title'].replace('Ms', 'Miss')
+    df_upd['title'] = df_upd['title'].replace('Mme', 'Mrs')
     return df_upd
 
 def create_name_length(df: pd.DataFrame) -> pd.DataFrame:
@@ -129,7 +137,7 @@ def main():
     ])
 
     # Defining model with the selected parameters
-    model = SVC(**SVC_PARAMS)
+    model = RandomForestClassifier(**RF_PARAMS)
 
     pipe = Pipeline(steps=[
         ('preprocessor', preprocessor),
@@ -137,7 +145,7 @@ def main():
         ('classifier', model)
     ])
 
-    cv_scores = cross_val_score(pipe, X, y, cv=5, scoring='accuracy')
+    cv_scores = cross_val_score(pipe, X, y, cv=10, scoring='accuracy')
     mean_cv_scores = cv_scores.mean().round(4)
     print(f'Mean CV Score: {mean_cv_scores}')
 
