@@ -168,7 +168,7 @@ def main():
     best_score = 0
     best_model = None
     for model_name, model in models.items():
-        print(f"Tuning hyperparameters for {model_name}...")
+        print(f'Tuning hyperparameters for {model_name}...')
         pipe = Pipeline(steps=[
             ('preprocessor', preprocessor),
             ('column_transformer', column_transformer),
@@ -182,7 +182,7 @@ def main():
             best_score = grid_search.best_score_
             best_model = grid_search.best_estimator_
 
-    print(f'Best Model: {type(best_model.named_steps["classifier"]).__name__} with Accuracy: {best_score:.4f}')
+    print(f'Best Model: {type(best_model.named_steps['classifier']).__name__} with Accuracy: {best_score:.4f}')
 
     with open('titanic_classifier_model.pkl', 'wb') as f:
         dill.dump({

@@ -16,4 +16,4 @@ prediction_df = pd.DataFrame({
 output_file_path = 'model/titanic_predictions.csv'
 prediction_df.to_csv(output_file_path, index=False)
 
-print(f"Predictions saved to {output_file_path}")
+print(f'Predictions saved to {output_file_path}')
